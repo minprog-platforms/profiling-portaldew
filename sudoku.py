@@ -37,13 +37,8 @@ class Sudoku:
 
     def value_at(self, x: int, y: int) -> int:
         """Returns the value at x,y."""
-        value = -1
-
-        for i in range(9):
-            for j in range(9):
-                if i == x and j == y:
-                    row = self._grid[y]
-                    value = int(row[x])
+        row = self._grid[y]
+        value = int(row[x])
 
         return value
 
@@ -87,21 +82,12 @@ class Sudoku:
 
     def row_values(self, i: int) -> Iterable[int]:
         """Returns all values at i-th row."""
-        values = []
-
-        for j in range(9):
-            values.append(self.value_at(j, i))
-
-        return values
+        return list(map(int, self._grid[i]))
 
     def column_values(self, i: int) -> Iterable[int]:
         """Returns all values at i-th column."""
-        values = []
-
-        for j in range(9):
-            values.append(self.value_at(i, j))
-
-        return values
+        values = ''.join(self._grid)
+        return list(map(int, values[i::9]))
 
     def block_values(self, i: int) -> Iterable[int]:
         """
@@ -111,36 +97,33 @@ class Sudoku:
         3 4 5
         6 7 8
         """
-        values = []
-
         x_start = (i % 3) * 3
         y_start = (i // 3) * 3
 
-        for x in range(x_start, x_start + 3):
-            for y in range(y_start, y_start + 3):
-                values.append(self.value_at(x, y))
+        values = ''.join(self._grid)
+        col1 = list(map(int, values[x_start::9]))[y_start:y_start+3]
+        col2 = list(map(int, values[x_start+1::9]))[y_start:y_start+3]
+        col3 = list(map(int, values[x_start+2::9]))[y_start:y_start+3]
+        values_block = [*col1, *col2, *col3]
 
-        return values
+        return values_block
 
     def is_solved(self) -> bool:
         """
         Returns True if and only if all rows, columns and blocks contain
         only the numbers 1 through 9. False otherwise.
         """
-        values = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
         result = True
 
         for i in range(9):
-            for value in values:
-                if value not in self.column_values(i):
-                    result = False
+            if sum(self.column_values(i)) < 45:
+                result = False
 
-                if value not in self.row_values(i):
-                    result = False
+            if sum(self.row_values(i)) < 45:
+                result = False
 
-                if value not in self.block_values(i):
-                    result = False
+            if sum(self.block_values(i)) < 45:
+                result = False
 
         return result
 
